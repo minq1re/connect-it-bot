@@ -10,20 +10,14 @@ ENV/
 env.bak/
 venv.bak/
 pythonenv*
-*.pyc
-
-# Flutter
-/flutter/.pub-cache/
-/flutter/build/
-/flutter/ios/Flutter/.last_build_id
-.flutter-plugins
-.flutter-plugins-dependencies
-.dart_tool/
-.packages
-.pub/
+*.egg-info/
+dist/
 build/
-/frontend/build/
-frontend/.dart_tool
+
+# Secrets
+.env
+*.env
+!.env.example
 
 # IDE
 .vscode/
@@ -34,10 +28,22 @@ frontend/.dart_tool
 
 # Docker
 *.log
-.env
-*.env
-/volumes/
+docker/volumes/
 
-# Secrets
-*.pem
-*.key
+# Flutter
+frontend/build/
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/pubspec.lock
+
+# Alembic (миграции пушим, но __pycache__ нет)
+alembic/__pycache__/
+alembic/versions/__pycache__/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
