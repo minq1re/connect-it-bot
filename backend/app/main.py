@@ -27,14 +27,19 @@ app = FastAPI(title="ConnectIT Backend")
 default_origins = "http://localhost:8080,http://127.0.0.1:8080,https://connectit.app"
 cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", default_origins).split(",")]
 
-# Flutter Web (flutter run -d chrome) часто поднимается на случайном порту, не только 8080.
-# Без этого браузер шлёт OPTIONS с Origin вида http://localhost:XXXXX и получает 400.
-_cors_dev_regex = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+# Локальная разработка (любой порт) + туннели без ручного CORS_ORIGINS:
+# - Cloudflare Quick Tunnel: https://xxxxx.trycloudflare.com
+# - ngrok: https://xxxxx.ngrok-free.app
+_cors_origin_regex = (
+    r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+    r"|^https://[a-zA-Z0-9.-]+\.trycloudflare\.com$"
+    r"|^https://[a-zA-Z0-9.-]+\.ngrok-free\.app$"
+)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_origin_regex=_cors_dev_regex,
+    allow_origin_regex=_cors_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
