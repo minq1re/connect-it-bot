@@ -8,10 +8,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api.auth import router as auth_router
+from app.api.users import router as users_router
 from app.api.exceptions_handlers import register_exception_handlers
 from app.core.database import ensure_runtime_compatibility, ping_db
+from app.core.upload import ensure_uploads_dir
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -24,15 +27,23 @@ app = FastAPI(title="ConnectIT Backend")
 default_origins = "http://localhost:8080,http://127.0.0.1:8080,https://connectit.app"
 cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", default_origins).split(",")]
 
+# Flutter Web (flutter run -d chrome) часто поднимается на случайном порту, не только 8080.
+# Без этого браузер шлёт OPTIONS с Origin вида http://localhost:XXXXX и получает 400.
+_cors_dev_regex = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
+    allow_origin_regex=_cors_dev_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 register_exception_handlers(app)
 app.include_router(auth_router)
+app.include_router(users_router)
+ensure_uploads_dir()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.middleware("http")

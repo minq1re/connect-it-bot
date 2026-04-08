@@ -10,8 +10,8 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 def _detect_profile(user: User) -> bool:
-    # Профиль считаем заполненным, если есть минимум bio или age, или city.
-    return bool(user.bio or user.age or user.city)
+    # Профиль считаем заполненным, если есть ключевые поля анкеты.
+    return bool(user.bio or user.age or user.city or user.role or user.direction or user.avatar_url)
 
 
 @router.get("/me", response_model=AuthResponse)

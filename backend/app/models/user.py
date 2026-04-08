@@ -36,6 +36,12 @@ class User(Base):
     city: Mapped[str | None] = mapped_column(
         String(128), index=True, comment="Город пользователя"
     )
+    role: Mapped[str | None] = mapped_column(
+        String(16), index=True, comment="Роль пользователя: mentor или mentee"
+    )
+    direction: Mapped[str | None] = mapped_column(
+        String(128), index=True, comment="Направление наставничества"
+    )
     bio: Mapped[str | None] = mapped_column(Text, comment="Краткое описание анкеты")
     skills: Mapped[str | None] = mapped_column(
         Text, comment="Навыки/интересы в свободной форме"

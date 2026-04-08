@@ -92,4 +92,10 @@ async def ensure_runtime_compatibility() -> None:
                 "ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN NOT NULL DEFAULT FALSE"
             )
         )
+        await session.execute(
+            text("ALTER TABLE IF EXISTS users ADD COLUMN IF NOT EXISTS role VARCHAR(16)")
+        )
+        await session.execute(
+            text("ALTER TABLE IF EXISTS users ADD COLUMN IF NOT EXISTS direction VARCHAR(128)")
+        )
         await session.commit()

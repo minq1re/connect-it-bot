@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
     last_name VARCHAR(128),
     age INTEGER,
     city VARCHAR(128),
+    role VARCHAR(16),
+    direction VARCHAR(128),
     bio TEXT,
     skills TEXT,
     about_me TEXT,
@@ -26,11 +28,17 @@ CREATE INDEX IF NOT EXISTS ix_users_telegram_id ON users (telegram_id);
 CREATE INDEX IF NOT EXISTS ix_users_username ON users (username);
 CREATE INDEX IF NOT EXISTS ix_users_age ON users (age);
 CREATE INDEX IF NOT EXISTS ix_users_city ON users (city);
+CREATE INDEX IF NOT EXISTS ix_users_role ON users (role);
+CREATE INDEX IF NOT EXISTS ix_users_direction ON users (direction);
 CREATE INDEX IF NOT EXISTS ix_users_is_active ON users (is_active);
 CREATE INDEX IF NOT EXISTS ix_users_is_blocked ON users (is_blocked);
 
 ALTER TABLE users
     ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS role VARCHAR(16);
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS direction VARCHAR(128);
 
 CREATE TABLE IF NOT EXISTS likes (
     id BIGSERIAL PRIMARY KEY,
