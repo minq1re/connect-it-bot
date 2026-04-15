@@ -46,6 +46,12 @@ class Match(Base):
     is_active: Mapped[bool] = mapped_column(
         Boolean, default=True, nullable=False, comment="Активен ли мэтч"
     )
+    notification_sent: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        comment="Отправлено ли уведомление о мэтче участникам",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -68,5 +74,5 @@ class Match(Base):
         return (
             "Match("
             f"id={self.id}, user1_id={self.user1_id}, user2_id={self.user2_id}, "
-            f"is_active={self.is_active})"
+            f"is_active={self.is_active}, notification_sent={self.notification_sent})"
         )

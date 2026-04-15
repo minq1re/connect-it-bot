@@ -98,4 +98,10 @@ async def ensure_runtime_compatibility() -> None:
         await session.execute(
             text("ALTER TABLE IF EXISTS users ADD COLUMN IF NOT EXISTS direction VARCHAR(128)")
         )
+        await session.execute(
+            text(
+                "ALTER TABLE IF EXISTS matches "
+                "ADD COLUMN IF NOT EXISTS notification_sent BOOLEAN NOT NULL DEFAULT FALSE"
+            )
+        )
         await session.commit()

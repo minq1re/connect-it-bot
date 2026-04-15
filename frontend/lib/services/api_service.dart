@@ -21,6 +21,18 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
+class LikeResult {
+  const LikeResult({
+    required this.isMatch,
+    required this.matchId,
+    required this.message,
+  });
+
+  final bool isMatch;
+  final int? matchId;
+  final String message;
+}
+
 class ApiService {
   ApiService({String? baseUrl, String? telegramInitData})
     : _baseUrl =
@@ -49,6 +61,29 @@ class ApiService {
     if (response.statusCode == 404) return null;
     _ensureSuccess(response);
     return User.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  Future<List<User>> getCandidates({
+    String? direction,
+    int limit = 1,
+    int offset = 0,
+  }) async {
+    final Map<String, String> query = <String, String>{
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+    };
+    if (direction != null && direction.trim().isNotEmpty) {
+      query['direction'] = direction.trim();
+    }
+
+    final Uri uri = _uri('/api/candidates').replace(queryParameters: query);
+    final http.Response response = await http.get(uri, headers: _headers);
+    _ensureSuccess(response);
+
+    final List<dynamic> body = jsonDecode(response.body) as List<dynamic>;
+    return body
+        .map((dynamic item) => User.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   Future<User> createProfile(Map<String, dynamic> data, File? photo) async {
@@ -100,6 +135,40 @@ class ApiService {
     final Map<String, dynamic> body =
         jsonDecode(response.body) as Map<String, dynamic>;
     return (body['is_active'] ?? false) as bool;
+  }
+
+  Future<LikeResult> likeCandidate(int likedUserId) async {
+    final http.Response response = await http.post(
+      _uri('/api/likes'),
+      headers: <String, String>{
+        ..._headers,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, dynamic>{'liked_user_id': likedUserId}),
+    );
+    _ensureSuccess(response);
+    final Map<String, dynamic> body =
+        jsonDecode(response.body) as Map<String, dynamic>;
+    return LikeResult(
+      isMatch: (body['is_match'] ?? false) as bool,
+      matchId: body['match_id'] as int?,
+      message: (body['message'] ?? '').toString(),
+    );
+  }
+
+  Future<String> dislikeCandidate(int dislikedUserId) async {
+    final http.Response response = await http.post(
+      _uri('/api/dislikes'),
+      headers: <String, String>{
+        ..._headers,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, dynamic>{'disliked_user_id': dislikedUserId}),
+    );
+    _ensureSuccess(response);
+    final Map<String, dynamic> body =
+        jsonDecode(response.body) as Map<String, dynamic>;
+    return (body['message'] ?? 'Дизлайк сохранен.').toString();
   }
 
   void _ensureSuccess(http.Response response) {

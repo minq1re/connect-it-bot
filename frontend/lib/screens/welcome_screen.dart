@@ -24,8 +24,10 @@ class WelcomeScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Откройте приложение через кнопку в Telegram, либо задайте '
-            'TELEGRAM_INIT_DATA при локальной отладке.',
+            'В обычном браузере нет данных Telegram. Варианты: открыть мини-приложение '
+            'по HTTPS из Telegram, либо в папке backend выполнить '
+            'python scripts/dev_telegram_init_data.py и пересобрать web с выведенным '
+            '--dart-define=TELEGRAM_INIT_DATA=...',
           ),
         ),
       );

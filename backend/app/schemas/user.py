@@ -3,7 +3,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.core.directions import DIRECTIONS, is_supported_direction
 
 
 class UserCreate(BaseModel):
@@ -13,6 +15,13 @@ class UserCreate(BaseModel):
     role: Literal["mentor", "mentee"]
     direction: str = Field(min_length=1, max_length=128)
 
+    @field_validator("direction")
+    @classmethod
+    def validate_direction(cls, value: str) -> str:
+        if not is_supported_direction(value):
+            raise ValueError(f"Направление должно быть одним из: {', '.join(DIRECTIONS)}")
+        return value
+
 
 class UserUpdate(BaseModel):
     first_name: str | None = Field(default=None, min_length=1, max_length=128)
@@ -20,6 +29,15 @@ class UserUpdate(BaseModel):
     description: str | None = Field(default=None, min_length=1, max_length=2000)
     role: Literal["mentor", "mentee"] | None = None
     direction: str | None = Field(default=None, min_length=1, max_length=128)
+
+    @field_validator("direction")
+    @classmethod
+    def validate_direction(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        if not is_supported_direction(value):
+            raise ValueError(f"Направление должно быть одним из: {', '.join(DIRECTIONS)}")
+        return value
 
 
 class UserResponse(BaseModel):
@@ -39,6 +57,10 @@ class UserResponse(BaseModel):
     is_blocked: bool
     created_at: datetime
     updated_at: datetime
+
+
+class CandidateResponse(UserResponse):
+    """Ответ для выдачи кандидатов на мэтчинг."""
 
 
 class ToggleActiveResponse(BaseModel):

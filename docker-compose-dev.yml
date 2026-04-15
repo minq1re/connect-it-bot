@@ -33,8 +33,6 @@ services:
     networks:
       - connectit-network
 
-  # Telegram-бот (long polling). WEB_APP_URL — публичный URL Flutter Web (HTTPS через ngrok и т.п.).
-  # Локально без Docker: cd backend && python -m app.bot
   bot:
     build:
       context: ./backend

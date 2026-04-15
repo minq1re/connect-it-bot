@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/welcome_screen.dart';
+import 'screens/home_screen.dart';
 import 'services/api_service.dart';
 
 void main() {
@@ -18,7 +18,7 @@ class ConnectItApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'ConnectIT',
       theme: ThemeData(useMaterial3: true, fontFamily: 'Roboto'),
-      home: WelcomeScreen(apiService: apiService),
+      home: HomeScreen(apiService: apiService),
     );
   }
 }
