@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
+import '../models/match_item.dart';
 import '../models/user.dart';
 import 'telegram_init_data.dart';
 
@@ -169,6 +171,32 @@ class ApiService {
     final Map<String, dynamic> body =
         jsonDecode(response.body) as Map<String, dynamic>;
     return (body['message'] ?? 'Дизлайк сохранен.').toString();
+  }
+
+  Future<List<MatchItem>> getMatches() async {
+    final http.Response response = await http.get(
+      _uri('/api/matches'),
+      headers: _headers,
+    );
+    _ensureSuccess(response);
+    final List<dynamic> body = jsonDecode(response.body) as List<dynamic>;
+    return body
+        .map((dynamic item) => MatchItem.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> openTelegramChat(int telegramUserId) async {
+    final Uri uri = Uri.parse('tg://user?id=$telegramUserId');
+    final bool launched = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched) {
+      throw ApiException(
+        statusCode: 500,
+        message: 'Не удалось открыть чат Telegram.',
+      );
+    }
   }
 
   void _ensureSuccess(http.Response response) {

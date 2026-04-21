@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<Widget> pages = <Widget>[
       ProfileScreen(apiService: widget.apiService),
       CandidatesScreen(apiService: widget.apiService),
-      const MatchesScreen(),
+      MatchesScreen(apiService: widget.apiService),
     ];
 
     return Scaffold(
@@ -31,12 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: (int index) {
-          if (index == 2) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Мэтчи скоро появятся')),
-            );
-            return;
-          }
           setState(() => _currentIndex = index);
         },
       ),
