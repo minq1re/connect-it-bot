@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import logging
+import os
 
-from fastapi import Depends, Header
+from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.exceptions_handlers import BlockedUserException, UnauthorizedException
@@ -12,6 +13,20 @@ from app.models.user import User
 from app.repositories.user_repository import UserRepository
 
 logger = logging.getLogger(__name__)
+
+
+def _admin_telegram_ids() -> set[int]:
+    raw = os.getenv("ADMIN_TELEGRAM_IDS", "").strip()
+    if not raw:
+        return set()
+    ids: set[int] = set()
+    for token in raw.split(","):
+        token = token.strip()
+        if not token:
+            continue
+        if token.isdigit():
+            ids.add(int(token))
+    return ids
 
 
 async def get_current_user(
@@ -49,3 +64,17 @@ async def get_current_user(
         raise BlockedUserException("Ваш аккаунт заблокирован. Обратитесь в поддержку.")
 
     return user
+
+
+async def get_admin_user(current_user: User = Depends(get_current_user)) -> User:
+    admin_ids = _admin_telegram_ids()
+    if current_user.telegram_id not in admin_ids:
+        logger.warning(
+            "Запрещен доступ к admin endpoint для telegram_id=%s",
+            current_user.telegram_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Требуются права администратора.",
+        )
+    return current_user

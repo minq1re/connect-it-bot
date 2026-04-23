@@ -104,4 +104,16 @@ async def ensure_runtime_compatibility() -> None:
                 "ADD COLUMN IF NOT EXISTS notification_sent BOOLEAN NOT NULL DEFAULT FALSE"
             )
         )
+        await session.execute(
+            text(
+                "ALTER TABLE IF EXISTS reports "
+                "ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ"
+            )
+        )
+        await session.execute(
+            text(
+                "ALTER TABLE IF EXISTS reports "
+                "ADD COLUMN IF NOT EXISTS resolution_note TEXT"
+            )
+        )
         await session.commit()

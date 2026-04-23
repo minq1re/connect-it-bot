@@ -11,9 +11,11 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.auth import router as auth_router
+from app.api.admin import router as admin_router
 from app.api.candidates import router as candidates_router
 from app.api.likes import router as likes_router
 from app.api.matches import router as matches_router
+from app.api.reports import router as reports_router
 from app.api.users import router as users_router
 from app.api.exceptions_handlers import register_exception_handlers
 from app.core.database import ensure_runtime_compatibility, ping_db
@@ -53,6 +55,8 @@ app.include_router(users_router)
 app.include_router(candidates_router)
 app.include_router(likes_router)
 app.include_router(matches_router)
+app.include_router(reports_router)
+app.include_router(admin_router)
 ensure_uploads_dir()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

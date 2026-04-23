@@ -3,15 +3,15 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import BigInteger, DateTime, Enum as SQLEnum, ForeignKey, Index, String, Text, func
+from sqlalchemy import BigInteger, DateTime, Enum as SQLEnum, ForeignKey, Index, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
 
 class ReportStatus(str, Enum):
-    OPEN = "open"
-    REVIEWING = "reviewing"
+    NEW = "new"
+    IN_PROGRESS = "in_progress"
     RESOLVED = "resolved"
     REJECTED = "rejected"
 
@@ -41,20 +41,20 @@ class Report(Base):
         comment="Пользователь, на которого отправлена жалоба",
     )
     reason: Mapped[str] = mapped_column(
-        String(255), nullable=False, comment="Короткая причина жалобы"
-    )
-    details: Mapped[str | None] = mapped_column(
-        Text, comment="Подробное описание жалобы"
+        Text,
+        nullable=False,
+        comment="Текст жалобы",
     )
     status: Mapped[ReportStatus] = mapped_column(
         SQLEnum(
             ReportStatus,
             name="report_status",
             values_callable=lambda enum_cls: [item.value for item in enum_cls],
+            native_enum=False,
         ),
         nullable=False,
-        default=ReportStatus.OPEN,
-        server_default=ReportStatus.OPEN.value,
+        default=ReportStatus.NEW,
+        server_default=ReportStatus.NEW.value,
         comment="Текущий статус обработки жалобы",
     )
     created_at: Mapped[datetime] = mapped_column(
@@ -62,6 +62,16 @@ class Report(Base):
         server_default=func.now(),
         nullable=False,
         comment="Дата и время создания жалобы",
+    )
+    resolved_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Дата и время закрытия жалобы",
+    )
+    resolution_note: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+        comment="Комментарий модератора о решении",
     )
 
     reporter: Mapped["User"] = relationship(
@@ -79,5 +89,5 @@ class Report(Base):
         return (
             "Report("
             f"id={self.id}, reporter_id={self.reporter_id}, "
-            f"reported_user_id={self.reported_user_id}, status={self.status})"
+            f"reported_user_id={self.reported_user_id}, status={self.status.value})"
         )

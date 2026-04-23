@@ -67,7 +67,6 @@ async def main() -> None:
                     reporter_id=user1.id,
                     reported_user_id=user2.id,
                     reason="spam",
-                    details="Тестовая жалоба для проверки репозитория",
                 )
                 print(f"Report created: {report}")
 
