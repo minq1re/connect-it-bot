@@ -35,6 +35,25 @@ class LikeResult {
   final String message;
 }
 
+class RequestCancelToken {
+  bool _isCancelled = false;
+  http.Client? _client;
+
+  bool get isCancelled => _isCancelled;
+
+  void bind(http.Client client) {
+    _client = client;
+    if (_isCancelled) {
+      _client?.close();
+    }
+  }
+
+  void cancel() {
+    _isCancelled = true;
+    _client?.close();
+  }
+}
+
 class ApiService {
   ApiService({String? baseUrl, String? telegramInitData})
     : _baseUrl =
@@ -196,6 +215,39 @@ class ApiService {
         statusCode: 500,
         message: 'Не удалось открыть чат Telegram.',
       );
+    }
+  }
+
+  Future<void> reportUser(
+    int reportedUserId,
+    String reason, {
+    RequestCancelToken? cancelToken,
+  }) async {
+    final http.Client client = http.Client();
+    cancelToken?.bind(client);
+    try {
+      if (cancelToken?.isCancelled == true) {
+        throw const HttpException('request cancelled');
+      }
+      final http.Response response = await client.post(
+        _uri('/api/reports'),
+        headers: <String, String>{
+          ..._headers,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'reported_user_id': reportedUserId,
+          'reason': reason,
+        }),
+      );
+      _ensureSuccess(response);
+    } on http.ClientException {
+      if (cancelToken?.isCancelled == true) {
+        throw ApiException(statusCode: 499, message: 'request_cancelled');
+      }
+      rethrow;
+    } finally {
+      client.close();
     }
   }
 

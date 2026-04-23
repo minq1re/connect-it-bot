@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../models/user.dart';
+import '../core/strings.dart';
 import '../services/api_service.dart';
 import '../services/directions_service.dart';
 import '../widgets/candidate_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/loading_shimmer.dart';
+import '../widgets/report_dialog.dart';
 
 enum _CandidatesState { loading, loaded, empty }
 enum _ReactionAction { like, dislike }
@@ -157,6 +159,41 @@ class _CandidatesScreenState extends State<CandidatesScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Future<void> _openReportDialog() async {
+    if (_candidate == null || _isBusy) return;
+    final User reportedCandidate = _candidate!;
+    final bool? submitted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: !_isBusy,
+      builder: (BuildContext context) => ReportDialog(
+        apiService: widget.apiService,
+        reportedUserId: reportedCandidate.id,
+      ),
+    );
+    if (!mounted) return;
+    if (submitted == true) {
+      _showSnack(Strings.reportSuccess);
+      // После успешной жалобы автоматически скрываем анкету через дизлайк
+      // и загружаем следующего кандидата.
+      setState(() => _isBusy = true);
+      try {
+        await widget.apiService.dislikeCandidate(reportedCandidate.id);
+        if (!mounted) return;
+        await _loadCandidate();
+      } on ApiException catch (e) {
+        if (!mounted) return;
+        _showSnack(e.message);
+      } catch (_) {
+        if (!mounted) return;
+        _showSnack('Не удалось скрыть кандидата после жалобы.');
+      } finally {
+        if (mounted) {
+          setState(() => _isBusy = false);
+        }
+      }
+    }
+  }
+
   String? _resolvePhotoUrl(String? relativeUrl) {
     if (relativeUrl == null || relativeUrl.isEmpty) return null;
     const String baseUrl = String.fromEnvironment(
@@ -271,6 +308,7 @@ class _CandidatesScreenState extends State<CandidatesScreen> {
               user: user,
               photoUrl: _resolvePhotoUrl(user.photoUrl),
               onLike: () => _flyOutAndReact(_ReactionAction.like),
+              onReport: _openReportDialog,
               onDislike: () => _flyOutAndReact(_ReactionAction.dislike),
               isBusy: _isBusy,
             ),

@@ -8,6 +8,7 @@ class CandidateCard extends StatelessWidget {
     required this.user,
     required this.photoUrl,
     required this.onLike,
+    required this.onReport,
     required this.onDislike,
     required this.isBusy,
   });
@@ -15,6 +16,7 @@ class CandidateCard extends StatelessWidget {
   final User user;
   final String? photoUrl;
   final VoidCallback onLike;
+  final VoidCallback onReport;
   final VoidCallback onDislike;
   final bool isBusy;
 
@@ -150,7 +152,7 @@ class CandidateCard extends StatelessWidget {
             _actionButton(
               icon: Icons.shield,
               color: _reportColor,
-              onPressed: null,
+              onPressed: isBusy ? null : onReport,
             ),
             _actionButton(
               icon: Icons.heart_broken,
