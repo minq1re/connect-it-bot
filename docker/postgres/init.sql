@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
     direction VARCHAR(128),
     bio TEXT,
     skills TEXT,
-    about_me TEXT,
     avatar_url VARCHAR(512),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_verified BOOLEAN NOT NULL DEFAULT FALSE,
@@ -39,6 +38,8 @@ ALTER TABLE users
     ADD COLUMN IF NOT EXISTS role VARCHAR(16);
 ALTER TABLE users
     ADD COLUMN IF NOT EXISTS direction VARCHAR(128);
+ALTER TABLE users
+    DROP COLUMN IF EXISTS about_me;
 
 CREATE TABLE IF NOT EXISTS likes (
     id BIGSERIAL PRIMARY KEY,

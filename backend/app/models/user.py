@@ -46,9 +46,6 @@ class User(Base):
     skills: Mapped[str | None] = mapped_column(
         Text, comment="Навыки/интересы в свободной форме"
     )
-    about_me: Mapped[str | None] = mapped_column(
-        Text, comment="Расширенная информация о пользователе"
-    )
     avatar_url: Mapped[str | None] = mapped_column(
         String(512), comment="Ссылка на аватар в CDN/Telegram"
     )
